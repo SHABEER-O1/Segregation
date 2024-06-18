@@ -1,0 +1,73 @@
+// Pin definitions
+const int raindropSensorPin = 2;  // Raindrop sensor connected to D2
+const int motorAControlPin1 = 4;  // Motor A IN1 connected to D4 on L298N
+const int motorAControlPin2 = 5;  // Motor A IN2 connected to D5 on L298N
+const int motorBControlPin1 = 6;  // Motor B IN3 connected to D6 on L298N
+const int motorBControlPin2 = 7;  // Motor B IN4 connected to D7 on L298N
+const int in3Pin = 8;             // Motor A enable pin ENA connected to D8 on L298N
+const int in4Pin = 9;             // Motor B enable pin ENB connected to D9 on L298N
+
+void setup() {
+  // Initialize serial communication
+  Serial.begin(9600);
+
+  // Set sensor pin as input
+  pinMode(raindropSensorPin, INPUT);
+
+  // Set motor control pins as output
+  pinMode(motorAControlPin1, OUTPUT);
+  pinMode(motorAControlPin2, OUTPUT);
+  pinMode(motorBControlPin1, OUTPUT);
+  pinMode(motorBControlPin2, OUTPUT);
+  pinMode(in3Pin, OUTPUT);
+  pinMode(in4Pin, OUTPUT);
+
+  // Ensure motors are initially off
+  digitalWrite(motorAControlPin1, LOW);
+  digitalWrite(motorAControlPin2, LOW);
+  digitalWrite(motorBControlPin1, LOW);
+  digitalWrite(motorBControlPin2, LOW);
+  digitalWrite(in3Pin, LOW);
+  digitalWrite(in4Pin, LOW);
+
+  Serial.println("Setup complete.");
+}
+
+void loop() {
+  // Read sensor value
+  int raindropValue = digitalRead(raindropSensorPin);
+
+  // Print the sensor value for debugging
+  Serial.print("Raindrop sensor value: ");
+  Serial.println(raindropValue);
+
+  // Check if raindrop sensor detects moisture
+  if (raindropValue == LOW) { // Inverted logic for moisture detection
+    Serial.println("Moisture detected! Running motor for one revolution.");
+    runMotorOneRevolution();
+    delay(1000); // Wait for a second to avoid multiple triggers
+  } else {
+    Serial.println("No moisture detected.");
+  }
+
+  delay(100); // Short delay to debounce the sensor
+}
+
+void runMotorOneRevolution() {
+  // Enable motor driver by setting ENA and ENB high
+  digitalWrite(in3Pin, HIGH);
+  digitalWrite(in4Pin, HIGH);
+
+  // Rotate motor A forward for one revolution
+  digitalWrite(motorAControlPin1, HIGH);
+  digitalWrite(motorAControlPin2, LOW);
+  delay(1000); // Adjust this delay to match one revolution of your motor
+  
+  // Stop the motor
+  digitalWrite(motorAControlPin1, LOW);
+  digitalWrite(motorAControlPin2, LOW);
+
+  // Disable motor driver by setting ENA and ENB low
+  digitalWrite(in3Pin, LOW);
+  digitalWrite(in4Pin, LOW);
+}
